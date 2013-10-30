@@ -1,0 +1,510 @@
+<!doctype html>
+
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=1024" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <title>CanJS | presentation by Miloš Popović | created using impress.js</title>
+    
+    <link href="http://fonts.googleapis.com/css?family=Open+Sans:regular,semibold,italic,italicsemibold|PT+Sans:400,700,400italic,700italic|PT+Serif:400,700,400italic,700italic" rel="stylesheet" />
+
+    <link href="css/impress-demo.css" rel="stylesheet" />
+    <link href="css/highlight-sunburst.css" rel="stylesheet" />
+</head>
+
+<body class="impress-not-supported">
+
+<div class="fallback-message">
+    <p>Your browser <b>doesn't support the features required</b> by impress.js, so you are presented with a simplified version of this presentation.</p>
+    <p>For the best experience please use the latest <b>Chrome</b>, <b>Safari</b> or <b>Firefox</b> browser.</p>
+</div>
+
+<div id="impress">
+
+    <div id="title" class="step" data-x="-600" data-y="-600" data-scale="4">
+			<img src="canjs.png"/>
+        <h1>Can<sup>JS</sup></h1>
+    </div>
+
+    <div class="step" data-x="-1500" data-y="700" data-scale="2">
+			<h4 class="fmed">Constructor</h4>
+		</div>
+
+
+    <div class="step" data-x="-1800" data-y="1200">
+<pre><code>var Book = can.Construct.extend({}, {
+  title: 'Common Sense',
+  author: 'Unknown',
+	
+  init: function(options) {
+    this.library = options.library;
+  },
+	
+  available: function() {
+    return this.library.isBookAvailable(this);
+  }
+});
+
+var b = new Book();
+b.author; // 'Unknown'
+b.available();
+</code></pre>
+    </div>
+
+    <div class="step" data-x="-1800" data-y="2000">
+<pre><code>var PdfBook = Book.extend({
+  available: function() {
+    return true;
+  }
+});
+</code></pre>
+    </div>
+
+    <div class="step" data-x="-500" data-y="1200">
+<pre><code>
+//:namespacing
+can.Construct.extend("myapp.core.base.BaseModel",{})
+
+//:constructorExtends
+var Animal = can.Construct.extend({
+  constructorExtends: false
+},{
+  //...
+});
+
+var animal = Animal(); // will be default behaviour in 1.2
+</code></pre>
+    </div>
+
+    <div class="step" data-x="-500" data-y="1700">
+<pre><code>
+//:setup
+//"A setup function for the instantiation of a constructor function."
+WidgetFactory = can.Construct.extend({
+  setup: function(element){
+    return [$(element)]
+  }
+});
+
+//:_super
+Person("Programmer", {
+  init: function(first, last, language) {
+    // call base's init
+    this._super(first, last);
+    //...
+  }
+});</code></pre>
+    </div>
+
+
+
+    <div id="model" class="step" data-x="-600" data-y="3600" data-scale="5">
+			<h2 class="fbigg">Model</h2>
+		</div>
+
+    <div class="step" data-x="-1800" data-y="4600">
+<pre><code>// Model - observable
+
+var todo = new Todo();
+todo.attr('name', 'Take out the trash');
+todo.attr('isDone', false);
+todo.attr('isDone'); // false
+todo.isDone; // false
+
+</code></pre>
+    </div>
+
+    <div class="step" data-x="-1800" data-y="5000">
+<pre><code>todo.bind('change', function(event, attr, how, newVal, oldVal) {});
+todo.bind('isDone', function(event, newVal, oldVal) {});
+
+todo.unbind('change', handler);
+todo.unbind('change');</code></pre>
+    </div>
+
+    <div class="step" data-x="-500" data-y="4600">
+<pre><code>// Computes
+var age = can.compute(29),
+age(); // 29
+age.bind('change', function(ev, newVal, oldVal) {});
+
+
+var name = new can.Observe({
+  first: 'Alice',
+  last: 'Liddell'
+});
+var fullName = can.compute(function() {
+  return name.attr('first') + ' ' + name.attr('last');
+});
+
+fullName(); // 'Alice Liddell'
+fullName.bind('change', handler);
+</code></pre>
+    </div>
+
+    <div class="step" data-x="800" data-y="4600">
+<pre><code>// Model - persistence
+var Todo = can.Model({
+  findAll: 'GET /todos',
+  findOne: 'GET /todos/{id}',
+  create: 'POST /todos',
+  update: 'PUT /todos/{id}',
+  destroy: 'DELETE /todos/{id}'
+}, {});
+
+Todo.findAll(params, success(items), error);
+
+
+todo.save(success, error);
+todo.destroy(success, error);</code></pre>
+    </div>
+
+
+    <div class="step" data-x="-600" data-y="2900" data-scale="4">
+			<h3 class="fbig">List</h3>
+			<br/><br/><br/>
+		</div>
+
+    <div class="step" data-x="-600" data-y="2600" data-scale="3">
+			<h4 class="fmed">Observe.List</h4>
+			<br/><br/>
+			<h4 class="fmed">Model.List</h4>
+		</div>
+
+
+    <div class="step" data-x="-400" data-y="2700">
+<pre><code>// Observe.List + Model.List
+
+var list = new can.Observe.List(['Alice', 'Bob', 'Eve']);
+// methods: indexOf, pop, push, shift, unshift, splice
+
+list.bind('change', handler);
+// set, add, remove, length</code></pre>
+    </div>
+
+    <div class="step" data-x="900" data-y="2500">
+<pre><code>// "can.Model.findAll or can.Model.models will almost always 
+// be used to return a can.Model.List"
+var todos = Todo.models([
+  new Todo( { name: "Do the dishes" } ),
+  new Todo( { name: "Wash floors" } )
+]);
+todos.constructor; // can.Model.List
+
+Todo.findAll({}, function(todos) {
+  todos.constructor; // can.Model.List
+});</code></pre>
+    </div>
+
+    <div class="step" data-x="900" data-y="3200">
+<pre><code>// Listening to events
+var todo3 = new Todo({name: "Buy groceries"});
+todos.push( todo3 );
+
+todos.bind("remove", function( ev, oldVals, ndx ) {
+  console.log(oldVals[ndx].attr("name") + " removed")
+})
+todo1.destroy(); // console shows "Buy groceries removed"
+</code></pre>
+    </div>
+
+
+
+
+
+    <div class="step" data-x="3900" data-y="-1100" data-scale="5">
+        <h2 class="fbigg">View</h2>
+    </div>
+
+
+    <div class="step" data-x="3700" data-y="-200" data-scale="4">
+        <h2 class="fbig">Template</h2>
+    </div>
+
+    <div class="step" data-x="2700" data-y="500">
+<pre><code><% can.each(this, function(val, key) { %>
+    &lt;li&gt;<%= val.attr('description') %>&lt;/li&gt;
+<% }); %>
+</code></pre>
+		</div>
+
+
+    <div class="step" data-x="2700" data-y="700">
+<pre><code>Todo.findAll({}, function(todos) {
+  $('#nav').html(can.view('todoList', todos))
+  // pass ''todos/todos.ejs' to render URL
+});
+
+// Deferred
+can.view('todos.ejs', {
+  todos: Todo.findAll().
+  user: User.findOne({id: 5})
+}).then(function(fragment) {
+  document.getElementById('todos').appendChild(fragment);
+});
+</code></pre></div>
+
+    <div class="step" data-x="4200" data-y="500">
+<pre><code>// Render to string with 'can.view.render'
+
+<% can.each(todos, function(todo, key) { %>
+    &lt;li&gt;<%== can.view.render('todos.ejs', todo); %>&lt;/li&gt;
+<% }); %>
+</code></pre>
+    </div>
+
+
+    <div class="step" data-x="3700" data-y="900" data-scale="4">
+        <h2 class="fmed">EJS</h2>
+    </div>
+
+    <div class="step" data-x="2400" data-y="1400">
+<pre><code>
+&lt;script type="text/ejs" id="todoList"&gt;
+<% for(var i = 0; i < todos.length; ++i) { %>
+    &lt;li&gt;<%= this[i].attr('description') %>&lt;/li&gt;
+<% } %>
+&lt;/script&gt;
+
+// <% %>   - run
+// <%= %>  - evaluate
+// <%== %> - evaluate and write raw
+
+&lt;img src="surprise.gif" 
+    <%= function(element) { element.style.display = 'none'; } %>/&gt;
+</code></pre>
+    </div>
+
+    <div class="step" data-x="3700" data-y="1400">
+<pre><code>//Render
+Todo.findAll({}, function(todos) {
+  document.getElementById('list').appendChild(can.view('todoList', todos));
+});
+
+// Render (deferred)
+can.view('todosAndUser', {
+  todos: Todo.findAll(),
+  user: User.findOne({id: 5})
+}).then(function(frag) {
+  document.getElementById('todos').appendChild(fragment);
+});
+</code></pre>
+    </div>
+
+
+
+    <div class="step" data-x="4600" data-y="900" data-scale="3">
+        <h2 class="fmed">{{mustache}}</h2>
+    </div>
+
+    <div class="step" data-x="4400" data-y="1950">
+<pre><code>&lt;script type="text/mustache" id="todosList"&gt;
+    {{#todos}}
+    &lt;li&gt;{{description}}&lt;/li&gt;
+    {{/todos}}
+&lt;/script&gt;
+
+// {{ }}   - HTML escape and write
+// {{{ }}} - write raw
+// {{! }}  - comment
+</code></pre>
+    </div>
+
+    <div class="step" data-x="5100" data-y="1400">
+<pre><code>// Helpers - third argument to can.view
+var fragment = can.view('todosList', {todos: todos}, {
+  uppercase: function(str) {
+    return str.toUppercase();
+  }
+});
+</code></pre></div>
+
+    <div class="step" data-x="5700" data-y="1700">
+<pre><code>&lt;script type="text/mustache" id="todosList"&gt;
+    {{#todos}}
+    &lt;li&gt;{{uppercase description}}&lt;/li&gt;
+    {{/todos}}
+
+    {{>todoDetails}}
+&lt;/script&gt;
+
+// Partials - nested templates
+&lt;script type="text/mustache" id="todosDetails"&gt;
+    &lt;b&gt;{{todoName}}&lt;/b&gt;&lt;em&gt;{{todoDateCreated}}&lt;/em&gt;
+&lt;/script&gt;
+</code></pre></div>
+
+
+    <div class="step" data-x="3700" data-y="2400" data-scale="4">
+        <h2 class="fbig">Control</h2>
+    </div>
+
+    <div class="step" data-x="2400" data-y="3400">
+<pre><code>var Todos = can.Control.extend({
+  defaults : { view: 'todos.ejs' }
+}, {
+
+  init: function( el , options ) {
+    var self = this;
+    Todo.findAll( {}, function( todos ) {
+      self.element.html( self.options.view, todos );
+    });
+  },
+
+  'li click': function(el, ev) {
+    console.log('You clicked ' + el.text());
+  }
+});
+</code></pre>
+    </div>
+
+    <div class="step" data-x="3700" data-y="3400">
+<pre><code>//Initiate a view
+var todosList = new Todos('#todos', {});
+
+// this Control will use todos.ejs
+new Todos(document.body.firstChild);
+
+// this Control will use todos2.ejs
+new Todos('#todoList', {view: 'todos2.ejs'});</code></pre>
+    </div>
+
+    <div class="step" data-x="5000" data-y="3400">
+<pre><code>//Other than nested elements
+var Tooltip = can.Control({
+  '{window} click': function(el, ev) {}
+});
+
+// Destroying
+var list = new Todos('#todos');
+$('#todos').length; // 1
+list.destroy();
+$('#todos').length; // 1
+
+// "when a Control's element is removed from the page,
+// destroy is called on the Control"
+</code></pre>
+    </div>
+
+
+    <div class="step" data-x="5100" data-y="4000" data-scale="2">
+			<ul>
+			<li class="fmed">+ I18N</li>
+			<li class="fmed">+ config</li>
+			</ul>
+		</div>
+
+
+    <div class="step" data-x="7000" data-y="2100" data-scale="5" data-rotate="270">
+        <h2 class="fbigg">Routing</h2>
+    </div>
+
+    <div class="step" data-x="8500" data-y="2500" data-rotate="270">
+<pre><code>// Listens for changes and updates window.location.hash
+var Routing = can.Control({
+  'route': function() {
+    // Matches every routing change, but gets passed no data.
+  },
+
+  'todos/:id route': function(data) {
+    // Matches routes like #!todos/5,
+    // and will get passed {id: 5} as data.
+  },
+
+  ':type/:id route': function(data) {
+    // Matches routes like #!recipes/5,
+    // and will get passed {id: 5, type: 'recipes'} as data.
+  }
+});
+</code></pre>
+    </div>
+
+    <div class="step" data-x="8500" data-y="1100" data-rotate="270">
+<pre><code>// Give can.route a template
+can.route(':type/:id');
+
+// Listen to changes (can.route is can.Observe)
+can.route.bind('id', function(ev, newVal, oldVal) {
+  console.log('The hash\'s id changed.');
+});
+
+
+// create links
+var a = can.route.link(
+  'Todo 5',
+  {id: 7},
+  {className: 'button'}
+);
+a; // <a href="#!todos/7" class="button">Todo 5</a>
+</code></pre>
+    </div>
+
+
+
+    <div class="step" data-x="2600" data-y="4000" data-scale="2">
+			<h3 class="fbig">+Deferred</h3>
+		</div>
+
+    <div class="step" data-x="2400" data-y="4600">
+<pre><code>// new Deferred:
+var dfd = new can.Deferred();
+
+// Add a done callback:
+dfd.done(function(foo) {
+  console.log('Resolved!');
+});
+//:fail, always
+
+// jQuery.Deferred()
+// :always, :done, :fail, :when, :then
+</code></pre>
+    </div>
+
+    <div class="step" data-x="2400" data-y="5200">
+<pre><code>var dfd2 = new can.Deferred();
+// Add done and fail callbacks:
+dfd2.then(functon(foo) {
+  console.log('Also resolved.');
+});
+
+// Create a Deferred that resolves when all passed Deferreds resolve:
+var endDfd = can.when(dfd, dfd2).then(function() {
+  console.log('I open at the close.');
+});</code></pre>
+    </div>
+
+
+    <div class="step" data-x="4500" data-y="4700" data-scale="2">
+			<h3 class="fbig">+Observe</h3>
+		</div>
+
+
+
+    <div id="thanks" class="step" data-x="10000" data-y="4500" data-rotate="20" data-scale="4">
+        <p>Thanks!</p>
+				<br/>
+				<p>Miloš Popović</p>
+        <q><a>http://github.com/miloss</a></q>
+        <q><a>http://twitter.com/mochapoetaster</a></q>
+    </div>
+
+
+    <div id="its-in-3d" class="step" data-x="7200" data-y="4300" data-z="-100" data-rotate-x="-50" data-rotate-y="40" data-scale="4">
+        <p>Questions?</p>
+    </div>
+
+    <div id="overview" class="step" data-x="3000" data-y="1500" data-scale="10">
+    </div>
+
+</div>
+
+
+<script src="js/impress.js"></script>
+<script>impress().init();</script>
+
+<script src="js/highlight.pack.js"></script>
+<script>hljs.initHighlightingOnLoad();</script>
+
+</body>
+</html>
