@@ -1,7 +1,10 @@
 canjs-presentation
 ==================
 
-CanJS framework presentation done using **impress.js**:
+CanJS framework presentation done using **impress.js**
+
+![canjs-presentation screenshot](http://miloss.github.io/canjs-presentation/screenshot.png)
+
 http://miloss.github.com/canjs-presentation
 
 
